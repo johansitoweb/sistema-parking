@@ -1,0 +1,794 @@
+//CREACIÓN DE LA BASE DE DATOS
+CREATE DATABASE "ParkinDB"
+    WITH 
+    OWNER = "UserParkingDB"
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1;
+
+COMMENT ON DATABASE "ParkinDB"
+    IS 'Esta base de datos pertenece al aplicativo Parking en Java Swing';
+
+//CREACIÓN DE TABLAS
+
+create table rateday (
+id SERIAL primary key,
+priceday decimal (4,2)
+);
+
+create table rateour (
+id SERIAL primary key,
+pricehour decimal (4,2)
+);
+
+create table typecar (
+id SERIAL primary key,
+typcar varchar (50)
+);
+
+create table ratecar (
+id SERIAL primary key,
+fktypecar int,
+fkratehour int,
+fkrateday int,
+FOREIGN KEY (fkratehour) REFERENCES rateour (id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fkrateday) REFERENCES rateday (id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fktypecar) REFERENCES typecar (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+create table marcacar (
+id SERIAL primary key,
+marcacar varchar (50)
+);
+
+create table statecar (
+id SERIAL primary key,
+statecar varchar (50)
+);
+
+create table Car (
+id SERIAL primary key,
+numbercar varchar (6),
+color varchar (30),
+fkmarcacar integer,
+fktypecar  integer,
+fkstatecar  integer,
+FOREIGN KEY (fkmarcacar) REFERENCES marcacar (id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fktypecar) REFERENCES typecar (id)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fkstatecar) REFERENCES statecar (id)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+create table sex (
+id SERIAL primary key,
+sex varchar (20) 
+);
+
+create table client (
+id SERIAL primary key,
+firstname varchar (100), 
+lasttname varchar (100),
+identification varchar (8),
+phone integer,
+address varchar(200),
+fksexo integer,
+fkcar integer,
+FOREIGN KEY (fksexo) REFERENCES sex (id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fkcar) REFERENCES Car (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+create table typeaccount (
+id SERIAL primary key,
+typeaccount varchar (20) 
+);
+create table account (
+id SERIAL primary key,
+userid varchar (10),
+pass varchar(10),
+fktypeaccount integer,
+FOREIGN KEY (fktypeaccount) REFERENCES typeaccount (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+create table spaces (
+id SERIAL primary key,
+spaces integer,
+fktypestates integer,
+FOREIGN KEY (fktypestates) REFERENCES TypeState (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+create table TypeState (
+id SERIAL primary key,
+typestate varchar(50)
+);
+drop table states;
+
+create table parking (
+id SERIAL primary key,
+datetimestart timestamp,
+datetimeend timestamp,
+fkclient integer,
+fkaccount integer,
+fkspaces integer,
+FOREIGN KEY (fkclient) REFERENCES client (id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fkaccount) REFERENCES account (id)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fkspaces) REFERENCES spaces (id)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+create table typepay (
+id SERIAL primary key,
+typepay varchar (30)
+);
+create table pay (
+id SERIAL primary key,
+mount decimal (4,2),
+datetimepay timestamp,
+fkparking integer,
+fktypepay integer,
+FOREIGN KEY (fkparking) REFERENCES parking (id)ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (fktypepay) REFERENCES typepay (id)ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+//--------------------------------------------------------VIEWS ----------------------------------------//
+
+//Muestra todas las tarifas por día
+create view totaltarifadia as
+select * from rateday;
+
+//Muestra todas las tarifas por hora
+create view totaltarifahora as
+select * from rateour;
+
+//Muestra el total de tipo de pago e ingresa 3 registros
+insert into typepay (typepay) values ('Efectivo');
+insert into typepay (typepay) values ('Tarjeta');
+insert into typepay (typepay) values ('Qr');
+
+create view totaltipopago as
+select * from typepay;
+
+//Muestra el total de marcas de auto e ingresa 3 registros
+insert into marcacar (marcacar) values ('Toyota');
+insert into marcacar (marcacar) values ('Subaru');
+insert into marcacar (marcacar) values ('Nissan');
+create view totalmarcaauto as
+select * from marcacar;
+
+//Muestra el total de estados de auto e ingresa 3 registros
+insert into statecar (statecar) values ('Excelente');
+insert into statecar (statecar) values ('Malogrado');
+insert into statecar (statecar) values ('Observado');
+create view totalestadoauto as
+select * from statecar;
+
+//Se incorporaron los 2 tipos de usuarios
+insert into typeaccount(typeaccount) values ('Administrador');
+insert into typeaccount(typeaccount) values ('Empleado');
+
+
+//Se incorporaron los 2 tipos de sexo
+insert into sex(sex) values ('Masculino');
+insert into sex(sex) values ('Femenino');
+
+
+//Vista para mostrar solo los precios por hora en el combobox
+create view combopreciohora as
+select rateour.pricehour from rateour;
+select * from combopreciohora;
+
+//Se insertó 3 registros de los tipos de autos
+insert into typecar (typcar) values ('Auto');
+insert into typecar (typcar) values ('Camioneta');
+insert into typecar (typcar) values ('Bus');
+
+
+//Vistas de total de tipos de auto y combo de tipos de auto
+create view totaltipoauto as
+select * from typecar;
+create view combotipoauto as
+select typecar.typcar from typecar;
+
+//Vista de combotipo de usuario
+create view combotipousuario as
+select typeaccount.typeaccount from typeaccount;
+
+//Vista de combosexo
+create view combosexo as
+select sex.sex from sex;
+
+//Vista de combo tipo de auto
+create view combotipoauto as
+select typecar.typcar from typecar;
+
+//Vista de commboestado de auto
+create view comboestadoauto as
+select statecar.statecar from statecar;
+
+//Vista de combopreciodia 
+create view combopreciodia as
+select rateday.priceday from rateday;
+
+//Vista de combomarca 
+create view comboMarca as
+select marcacar.marcacar from marcacar;
+
+select * from comboMarca;
+
+//Vista de Total de Usuarios
+select statecar.statecar from statecar;
+
+create view totalusuarios as
+select account.id, account.userid,account.pass, typeaccount.typeaccount from account
+INNER JOIN typeaccount ON account.fktypeaccount = typeaccount.id ;
+
+//Vista de Total de Tarfida de Autos
+create view totaltarifaauto as
+select ratecar.id ,typecar.typcar, rateour.pricehour, rateday.priceday from ratecar
+INNER JOIN typecar ON ratecar.fktypecar = typecar.id
+INNER JOIN rateour ON ratecar.fkratehour = rateour.id
+INNER JOIN rateday ON ratecar.fkrateday= rateday.id
+
+//Vista de Total de Autos
+create view totalautos as
+select car.id, car.numbercar, car.color, marcacar.marcacar,typecar.typcar, statecar.statecar from car
+INNER JOIN marcacar  ON marcacar.id= car.fkmarcacar
+INNER JOIN typecar ON typecar.id = car.fktypecar
+INNER JOIN statecar ON statecar.id = car.fkstatecar
+
+//Vista de Total de Clientes
+create view totalclientes as
+select client.id, client.identification, client.firstname, client.lasttname, client.phone,client.address, 
+sex.sex,
+car.numbercar,car.color,
+marcacar.marcacar
+from client
+INNER JOIN sex  ON sex.id= client.fksexo
+INNER JOIN car ON car.id = client.fkcar
+INNER JOIN marcacar ON marcacar.id = car.fkmarcacar
+
+select *  from totalclientes;
+
+//Vista de Total de Tipoos de Estado
+create view totaltiposestado as
+select * from typestate;
+
+//Vista de combotipoestado 
+create view combotipoestado as
+select typestate.typestate from typestate;
+
+select * from  combotipoestado;
+
+//Vista de total de espacios
+create view totalespacios as
+select spaces.id,spaces.spaces, typestate.typestate from spaces
+INNER JOIN typestate ON typestate.id = spaces.fktypestates;
+
+//Vista de Total de Autos en el Estacionamiento
+create view totalAutosEstacionamiento as
+select parking.id, 
+car.numbercar,car.color,
+marcacar.marcacar,
+parking.datetimestart,
+parking.datetimeend,
+client.firstname, client.identification,
+typecar.typcar,
+statecar.statecar,
+typestate. typestate,
+spaces.spaces
+from parking
+INNER JOIN client ON client.id = parking.fkclient
+INNER JOIN spaces ON spaces.id = parking.fkspaces
+INNER JOIN typestate ON spaces.fktypestates = typestate.id
+INNER JOIN car ON car.id = client.fkcar
+INNER JOIN marcacar ON marcacar.id = car.fkmarcacar
+INNER JOIN typecar ON typecar.id =car.fktypecar
+INNER JOIN statecar ON statecar.id= car.fkstatecar;
+
+drop view totalAutosEstacionamiento;
+
+select * from totalAutosEstacionamiento;
+
+//Vista de combotipopago
+create view combotipopago as
+select typepay.typepay from typepay;
+
+select * from  combotipopago;
+
+//---------------------------------------------------FUNCIONES---------------------------------//
+
+//Función para mostrar id de tipo de auto por nombre de auto
+
+CREATE OR REPLACE Function mostraridportipopauto (nombre varchar)returns integer
+AS
+$$
+select typecar.id from typecar where typecar.typcar = nombre;
+$$
+language SQL
+
+//Función para mostrar id de precio por hora por precio por hora
+CREATE OR REPLACE Function mostraridporpreciohora (precio decimal)returns integer
+AS
+$$
+select rateour.id from rateour where rateour.pricehour = precio;
+$$
+language SQL
+
+//Función para mostrar id de precio por dia por precio por Dia
+CREATE OR REPLACE Function mostraridporpreciodia (precio decimal)returns integer
+AS
+$$
+select rateday.id from rateday where rateday.priceday = precio;
+$$
+language SQL
+
+select * from  rateday;
+
+
+//Función para mostrar id de usuario por dia tipo de usuario
+CREATE OR REPLACE Function mostraridportipousuario (usuario varchar)returns integer
+AS
+$$
+select typeaccount.id from typeaccount where typeaccount.typeaccount = usuario;
+$$
+language SQL
+
+//Función para mostrar id de usuario por sexo
+CREATE OR REPLACE Function mostraridporsexo(sexo varchar)returns integer
+AS
+$$
+select sex.id from sex where sex.sex = sexo;
+$$
+language SQL
+
+//Función para mostrar id por marca de auto
+CREATE OR REPLACE Function mostraridporsmarcaauto(marca varchar)returns integer
+AS
+$$
+select marcacar.id from marcacar where marcacar.marcacar = marca;
+$$
+language SQL
+
+//Función para mostrar id por tipodeauto
+CREATE OR REPLACE Function mostraridportipoauto(tipoauto varchar)returns integer
+AS
+$$
+select typecar.id from typecar where typecar.typcar = tipoauto;
+$$
+language SQL
+
+//Función para mostrar id por EstadoAuto
+CREATE OR REPLACE Function mostraridporestadoauto(estadoauto varchar)returns integer
+AS
+$$
+select statecar.id from statecar where statecar.statecar = estadoauto;
+$$
+language SQL
+
+//Función para mostrar id por TipoDeAuto
+CREATE OR REPLACE Function mostrarIdPorTipoAuto(tipoauto varchar)returns integer
+AS
+$$
+select typecar.id from typecar where typecar.typcar = tipoauto;
+$$
+language SQL
+
+select mostrarIdPorTipoAuto('Camioneta');
+
+//Función para mostrar id por TipoDeAuto
+CREATE OR REPLACE Function mostrarIdPorTipoEstado(tipoestado varchar)returns integer
+AS
+$$
+select typestate.id from typestate where typestate.typestate = tipoestado;
+$$
+language SQL
+
+//------------------------------------------------INSERTS--------------------------------------//
+
+//Función de insertar un nuevo usuario
+CREATE OR REPLACE Function insertarusuario (usuario varchar, pas varchar, fktipo integer)returns void
+AS
+$$
+insert into account (userid,pass,fktypeaccount) values (usuario,pas,fktipo);
+$$
+language SQL
+
+select insertarusuario('Frank','123',1);
+
+//Función de insertar tarifa dia
+CREATE OR REPLACE Function insertartarifadia (preciodia decimal)returns void
+AS
+$$
+insert into rateday (priceday) values (preciodia);
+$$
+language SQL
+
+//Función de insertar tarifa hora
+CREATE OR REPLACE Function insertartarifahora (preciohora decimal)returns void
+AS
+$$
+insert into rateour (pricehour) values (preciohora);
+$$
+language SQL
+
+//Función de insertar tipo de pago
+CREATE OR REPLACE Function insertartipopago (tipopago varchar)returns void
+AS
+$$
+insert into typepay (typepay) values (tipopago);
+$$
+language SQL
+
+
+//Función de insertar marca de auto
+CREATE OR REPLACE Function insertartmarcaauto (marcaauto varchar)returns void
+AS
+$$
+insert into marcacar (marcacar) values (marcaauto);
+$$
+language SQL
+
+//Función de insertar estado de auto
+CREATE OR REPLACE Function insertarestadoauto (estadoauto varchar)returns void
+AS
+$$
+insert into statecar (statecar) values (estadoauto);
+$$
+language SQL
+
+//Función de insertar tarifa de Auto
+CREATE OR REPLACE Function insertartarifaporauto (fktipocarro integer, fkpreciohora integer, fkpreciodia integer)returns void
+AS
+$$
+insert into ratecar (fktypecar,fkratehour,fkrateday) values (fktipocarro,fkpreciohora,fkpreciodia);
+$$
+language SQL
+
+//Función de insertar tipo de Auto
+CREATE OR REPLACE Function insertartiupoauto (tipoauto varchar)returns void
+AS
+$$
+insert into typecar (typcar) values (tipoauto);
+$$
+language SQL
+
+//Función de insertar Auto
+CREATE OR REPLACE Function insertarauto (matricula varchar, colorauto varchar, fkmarca integer, fktipoauto integer, fkestadoauto integer)returns void
+AS
+$$
+insert into car (numbercar,color,fkmarcacar,fktypecar,fkstatecar) values (matricula,colorauto,fkmarca,fktipoauto,fkestadoauto);
+$$
+language SQL
+
+//Función para modificar la tarifadia
+
+CREATE OR REPLACE Function modificartarifadia (codigo int, nuevopreciodia decimal(4,2))returns void
+AS
+$$
+UPDATE rateday set priceday =nuevopreciodia WHERE rateday.id= codigo;
+$$
+language SQL
+
+//Función para modificar la tarifahora
+CREATE OR REPLACE Function modificartarifahora (codigo int, nuevopreciohora decimal(4,2))returns void
+AS
+$$
+UPDATE rateour set pricehour =nuevopreciohora WHERE rateour.id= codigo;
+$$
+language SQL
+
+//Función para modificar tipopago
+CREATE OR REPLACE Function modificartipopago (codigo int, nuevotipopago varchar)returns void
+AS
+$$
+UPDATE typepay set typepay =nuevotipopago WHERE typepay.id= codigo;
+$$
+language SQL
+
+
+//Función para modificar marcadeauto
+CREATE OR REPLACE Function modificarmarcaauto (codigo int, nuevamarca varchar)returns void
+AS
+$$
+UPDATE marcacar set marcacar =nuevamarca WHERE marcacar.id= codigo;
+$$
+language SQL
+
+
+//Función para modificar estadoauto
+CREATE OR REPLACE Function modificarestadoauto (codigo int, nuevoestadoauto varchar)returns void
+AS
+$$
+UPDATE statecar set statecar =nuevoestadoauto WHERE statecar.id= codigo;
+$$
+language SQL
+
+//Función para modificar tarifaporauto
+
+CREATE OR REPLACE Function modificartarifaporauto (codigo int, codigotipoauto int, codigopreciohora int, codigopreciodia int)returns void
+AS
+$$
+UPDATE ratecar set fktypecar =codigotipoauto, fkratehour = codigopreciohora, fkrateday=codigopreciodia  WHERE ratecar.id= codigo;
+$$
+language SQL
+
+CREATE OR REPLACE Function modificarUsuario (codigo int, idusuario varchar(10), passusuario varchar(10), codigotipousuario int)returns void
+AS
+$$
+UPDATE account set userid = idusuario, pass=passusuario ,fktypeaccount =codigotipousuario  WHERE account.id= codigo;
+$$
+language SQL
+
+
+
+select * from account;
+
+//Función para Eliminar Tarfia Dia
+CREATE OR REPLACE Function eliminartarifadia (codigo int)returns void
+AS
+$$
+DELETE from rateday where rateday.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Tarfia Hora
+CREATE OR REPLACE Function eliminartarifahora (codigo int)returns void
+AS
+$$
+DELETE from rateour where rateour.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Tarfia Hora
+CREATE OR REPLACE Function eliminartipopago (codigo int)returns void
+AS
+$$
+DELETE from typepay where typepay.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Marca de auto
+CREATE OR REPLACE Function eliminarmarcaauto (codigo int)returns void
+AS
+$$
+DELETE from marcacar where marcacar.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Estado de auto
+CREATE OR REPLACE Function eliminarestadoauto (codigo int)returns void
+AS
+$$
+DELETE from statecar where statecar.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Tarifa por auto
+CREATE OR REPLACE Function eliminartarifaporauto (codigo int)returns void
+AS
+$$
+DELETE from ratecar where ratecar.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Tarifa por auto
+CREATE OR REPLACE Function eliminarusuario (codigo int)returns void
+AS
+$$
+DELETE from account where account.id =codigo;
+$$
+language SQL
+
+//Función para Modificar Tipo de Auto
+CREATE OR REPLACE Function modificarTipoAuto (codigo int, tipoauto varchar(50))returns void
+AS
+$$
+UPDATE typecar set typcar = tipoauto WHERE typecar.id= codigo;
+$$
+language SQL
+
+//Función para Eliminar Tarifa por auto
+CREATE OR REPLACE Function eliminarTipoAuto (codigo int)returns void
+AS
+$$
+DELETE from typecar where typecar.id =codigo;
+$$
+language SQL
+
+//Función para Eliminar Auto
+CREATE OR REPLACE Function eliminarAuto (codigo int)returns void
+AS
+$$
+DELETE from car where car.id =codigo;
+$$
+language SQL
+
+
+//Función para Modificar Auto
+CREATE OR REPLACE Function modificarAuto (codigo int, matricula varchar(6),colornuevo varchar(30), codmarca int ,codtipo int,codestado int)returns void
+AS
+$$
+UPDATE car set numbercar = matricula, color=colornuevo,fkmarcacar=codmarca, fktypecar=codtipo, fkstatecar=codestado  WHERE car.id= codigo;
+$$
+language SQL
+
+//Función de insertar Cliente
+CREATE OR REPLACE Function insertarcliente (nombre varchar(100), apellido varchar(100), identificacion varchar(8), telefono integer, direccion varchar(200),codsexo int, codauto int)returns void
+AS
+$$
+insert into client (firstname,lasttname,identification,phone,address,fksexo,fkcar) values (nombre,apellido,identificacion,telefono,direccion,codsexo,codauto);
+$$
+language SQL
+
+//Función para Modificar Cliente
+CREATE OR REPLACE Function modificarcliente (codigo int, nombre varchar(100), apellido varchar(100), identificacion varchar(8), telefono integer, direccion varchar(200),codsexo int)returns void
+AS
+$$
+UPDATE client set firstname = nombre, lasttname=apellido,identification=identificacion, phone=telefono, address=direccion , fksexo=codsexo WHERE client.id= codigo;
+$$
+language SQL
+
+//Función para Eliminar Cliente
+CREATE OR REPLACE Function eliminarCliente (codigo int)returns void
+AS
+$$
+DELETE from client where client.id =codigo;
+$$
+language SQL
+
+
+//Función de insertar TipoEstado
+CREATE OR REPLACE Function insertarTipoEstado (tipoestado varchar(50))returns void
+AS
+$$
+insert into typestate (typestate) values (tipoestado);
+$$
+language SQL
+
+//Eliminar Tipo de Estado
+CREATE OR REPLACE Function eliminarTipoEstado (codigo int)returns void
+AS
+$$
+DELETE from typestate where typestate.id =codigo;
+$$
+language SQL
+
+//Función para Modificar el Tipo de Estado
+CREATE OR REPLACE Function modificarTipoEstado (codigo int, tipoestado varchar(100))returns void
+AS
+$$
+UPDATE typestate set typestate = tipoestado  WHERE typestate.id= codigo;
+$$
+language SQL
+
+
+//Función de insertar Espacios
+CREATE OR REPLACE Function insertarEspacios (espacios int, tipoestado int)returns void
+AS
+$$
+insert into spaces (spaces,fktypestates) values (espacios,tipoestado);
+$$
+language SQL
+
+select insertarEspacios (10,1);
+
+select * from spaces;
+
+//Función para Modificar el Tipo de Estado
+CREATE OR REPLACE Function modificarEspacios (codigo int, espacios int, tipoestado int)returns void
+AS
+$$
+UPDATE spaces set spaces = espacios, fktypestates =tipoestado   WHERE spaces.id= codigo;
+$$
+language SQL
+
+//Eliminar Espacios
+CREATE OR REPLACE Function eliminarEspacio (codigo int)returns void
+AS
+$$
+DELETE from spaces where spaces.id =codigo;
+$$
+language SQL
+
+//Función para mostrar codigo de spaces Por codigoEstado
+CREATE OR REPLACE Function mostrarIdspacePorCodigoEstado(tipoestado varchar)returns integer
+AS
+$$
+select spaces.id from spaces
+INNER JOIN typestate ON typestate.id= spaces.fktypestates
+where typestate.typestate = tipoestado;
+$$
+language SQL
+
+
+//Función para insertar datos en el Parking
+CREATE OR REPLACE Function insertarParking(codcliente int,codcuenta int, codespacio int)returns void
+AS
+$$
+insert into parking (datetimestart,datetimeend,fkclient,fkaccount,fkspaces) values
+(current_timestamp,null,codcliente,codcuenta,codespacio)
+$$
+language SQL
+
+select  insertarParking(1,2,5);
+
+select * from parking;
+
+select * from typepay;
+
+CREATE OR REPLACE Function mostraridportipopago (nombre varchar)returns integer
+AS
+$$
+select typepay.id from typepay where typepay.typepay = nombre;
+$$
+language SQL
+
+//Función para Incorporar Hora de Salida
+CREATE OR REPLACE Function insertarHoraSalida (codigo int)returns void
+AS
+$$
+UPDATE parking set datetimeend = current_timestamp  WHERE parking.id= codigo;
+$$
+language SQL
+
+select * from insertarHoraSalida(2);
+
+select * from parking;
+
+
+//Función de insertar un el pago por el uso del parking
+CREATE OR REPLACE Function insertarPagoFinal (mount decimal(4,2), fkparking integer, fktypepay integer)returns void
+AS
+$$
+insert into pay (mount,datetimepay,fkparking,fktypepay) values (mount,current_timestamp,fkparking,fktypepay);
+$$
+language SQL
+
+select insertarPagoFinal(13.3,1,1);
+
+select * from pay;
+
+
+//Función para modificar estado de espacio Libre_a_Ocupado
+
+CREATE OR REPLACE Function libreAOcupado (codigo int)returns void
+AS
+$$
+UPDATE spaces set  fktypestates =2   WHERE spaces.id= codigo;
+$$
+language SQL
+
+
+//Función para mostrar el Total de Espacios Libres
+
+CREATE OR REPLACE Function TotalLibres() returns bigint
+AS
+$$
+select count(*) from spaces WHERE spaces.fktypestates=1;
+$$
+language SQL
+
+
+select TotalLibres();
+
+
+CREATE OR REPLACE Function TotalOcupados() returns bigint
+AS
+$$
+select count(*) from spaces WHERE spaces.fktypestates=2;
+$$
+language SQL
+
+select TotalOcupados();
+
+
+//Busqueda por Numero de Identificacion
+select client.id, client.firstname, client.lasttname, client.identification,
+client.phone, client.address, sex.sex from client
+INNER JOIN sex ON sex.id= client.fksexo
+WHERE client.identification='4234';
+
